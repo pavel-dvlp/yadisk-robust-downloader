@@ -103,6 +103,21 @@ def verbose_request(req: urllib.request.Request) -> str:
         raise e
 
 
+def clean_trailing_spaces(path):
+    parts = []
+    while True:
+        path, tail = os.path.split(path)
+        if tail:
+            parts.append(tail.rstrip())
+        else:
+            if path:
+                parts.append(path)
+            break
+    parts.reverse()
+
+    return os.path.join(*parts) if parts else ""
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--token", type=str, help="OAuth bearer token", default=None)
@@ -172,6 +187,7 @@ if __name__ == "__main__":
         with open(stat_path, 'w', encoding="utf-8") as stat_file:
             for cloud_path in cloud_paths:
                 local_path = os.path.normpath(base_path + cloud_path)
+                local_path = clean_trailing_spaces(local_path)
                 res = 'no'
                 if os.path.exists(local_path):
                     exists += 1
@@ -194,6 +210,7 @@ if __name__ == "__main__":
             k -= 1
             continue
         local_path = os.path.normpath(base_path + cloud_path)
+        local_path = clean_trailing_spaces(local_path)
         offset += 1
         timeout = args.timeout
         if os.path.exists(local_path):
